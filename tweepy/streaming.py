@@ -156,11 +156,22 @@ class ReadBuffer(object):
         self._encoding = encoding
 
     def read_len(self, length):
+        """Read the data stream until `length` characters been received
+
+        :param length: The number of characters to read from the stream(int)
+        :return: The str of the data read with `length` characters (str in
+            python 2, bytes in python 3)
+        """
         while not self._stream.closed:
             if len(self._buffer) >= length:
                 return self._pop(length)
             read_len = max(self._chunk_size, length - len(self._buffer))
             self._buffer += self._stream.read(read_len)
+
+        # if stream is closed before enough characters were received
+        raise httplib.IncompleteRead('%d bytes read, %d more expected'
+                                     % (len(self._buffer), length - len(self._buffer)))
+
 
     def read_line(self, sep=six.b('\n')):
         """Read the data stream until a given separator is found (default \n)
@@ -177,6 +188,9 @@ class ReadBuffer(object):
             else:
                 start = len(self._buffer)
             self._buffer += self._stream.read(self._chunk_size)
+
+        # if stream is closed before a seperator was received
+        raise httplib.IncompleteRead('"%s" sep was not received' % (str(sep),))
 
     def _pop(self, length):
         r = self._buffer[:length]
@@ -261,7 +275,7 @@ class Stream(object):
                     self.snooze_time = self.snooze_time_step
                     self.listener.on_connect()
                     self._read_loop(resp)
-            except (Timeout, ssl.SSLError) as exc:
+            except (Timeout, ssl.SSLError, httplib.IncompleteRead) as exc:
                 # This is still necessary, as a SSLError can actually be
                 # thrown when using Requests
                 # If it's not time out treat it like any other exception
@@ -310,7 +324,12 @@ class Stream(object):
         while self.running and not resp.raw.closed:
             length = 0
             while not resp.raw.closed:
-                line = buf.read_line().strip()
+                line = buf.read_line() #buf.read_line() may return none and hence stirip will give an error
+                try:
+                    line = line.strip()
+                except AttributeError:
+                    continue
+
                 if not line:
                     self.listener.keep_alive()  # keep-alive new lines are expected
                 elif line.isdigit():
