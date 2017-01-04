@@ -10,10 +10,12 @@ import logging
 import re
 import requests
 from requests.exceptions import Timeout
+from requests.packages.urllib3.exceptions import TimeoutError
 from threading import Thread
 from time import sleep
 
 import six
+from six.moves import http_client as httplib
 
 import ssl
 
