@@ -2,7 +2,7 @@
 # Copyright 2009-2010 Joshua Roesslein
 # See LICENSE for details.
 
-from __future__ import print_function
+
 
 from tweepy.error import TweepError
 from tweepy.parsers import ModelParser, RawParser
@@ -46,9 +46,9 @@ class BaseIterator(object):
         self.limit = 0
 
     def __next__(self):
-        return self.next()
+        return next(self)
 
-    def next(self):
+    def __next__(self):
         raise NotImplementedError
 
     def prev(self):
@@ -67,7 +67,7 @@ class CursorIterator(BaseIterator):
         self.prev_cursor = start_cursor or 0
         self.num_tweets = 0
 
-    def next(self):
+    def __next__(self):
         if self.next_cursor == 0 or (self.limit and self.num_tweets == self.limit):
             raise StopIteration
         data, cursors = self.method(cursor=self.next_cursor,
@@ -99,7 +99,7 @@ class IdIterator(BaseIterator):
         self.model_results = []
         self.index = 0
 
-    def next(self):
+    def __next__(self):
         """Fetch a set of items with IDs less than current set."""
         if self.limit and self.limit == self.num_tweets:
             raise StopIteration
@@ -161,7 +161,7 @@ class PageIterator(BaseIterator):
         BaseIterator.__init__(self, method, args, kargs)
         self.current_page = 0
 
-    def next(self):
+    def __next__(self):
         if self.limit > 0:
             if self.current_page > self.limit:
                 raise StopIteration
@@ -188,13 +188,13 @@ class ItemIterator(BaseIterator):
         self.page_index = -1
         self.num_tweets = 0
 
-    def next(self):
+    def __next__(self):
         if self.limit > 0:
             if self.num_tweets == self.limit:
                 raise StopIteration
         if self.current_page is None or self.page_index == len(self.current_page) - 1:
             # Reached end of current page, get the next page...
-            self.current_page = self.page_iterator.next()
+            self.current_page = next(self.page_iterator)
             self.page_index = -1
         self.page_index += 1
         self.num_tweets += 1

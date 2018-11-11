@@ -2,7 +2,7 @@
 # Copyright 2009-2010 Joshua Roesslein
 # See LICENSE for details.
 
-from __future__ import print_function
+
 
 import time
 import re
@@ -96,7 +96,7 @@ def bind_api(**config):
                 except IndexError:
                     raise TweepError('Too many parameters supplied!')
 
-            for k, arg in kwargs.items():
+            for k, arg in list(kwargs.items()):
                 if arg is None:
                     continue
                 if k in self.session.params:

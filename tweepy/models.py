@@ -2,7 +2,7 @@
 # Copyright 2009-2010 Joshua Roesslein
 # See LICENSE for details.
 
-from __future__ import absolute_import, print_function
+
 
 from tweepy.utils import parse_datetime, parse_html_value, parse_a_href
 
@@ -66,7 +66,7 @@ class Model(object):
         return results
 
     def __repr__(self):
-        state = ['%s=%s' % (k, repr(v)) for (k, v) in vars(self).items()]
+        state = ['%s=%s' % (k, repr(v)) for (k, v) in list(vars(self).items())]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(state))
 
 
@@ -76,7 +76,7 @@ class Status(Model):
     def parse(cls, api, json):
         status = cls(api)
         setattr(status, '_json', json)
-        for k, v in json.items():
+        for k, v in list(json.items()):
             if k == 'user':
                 user_model = getattr(api.parser.model_factory, 'user') if api else User
                 user = user_model.parse(api, v)
@@ -137,7 +137,7 @@ class User(Model):
     def parse(cls, api, json):
         user = cls(api)
         setattr(user, '_json', json)
-        for k, v in json.items():
+        for k, v in list(json.items()):
             if k == 'created_at':
                 setattr(user, k, parse_datetime(v))
             elif k == 'status':
@@ -207,7 +207,7 @@ class DirectMessage(Model):
     @classmethod
     def parse(cls, api, json):
         dm = cls(api)
-        for k, v in json.items():
+        for k, v in list(json.items()):
             if k == 'sender' or k == 'recipient':
                 setattr(dm, k, User.parse(api, v))
             elif k == 'created_at':
@@ -228,12 +228,12 @@ class Friendship(Model):
 
         # parse source
         source = cls(api)
-        for k, v in relationship['source'].items():
+        for k, v in list(relationship['source'].items()):
             setattr(source, k, v)
 
         # parse target
         target = cls(api)
-        for k, v in relationship['target'].items():
+        for k, v in list(relationship['target'].items()):
             setattr(target, k, v)
 
         return source, target
@@ -244,7 +244,7 @@ class Category(Model):
     @classmethod
     def parse(cls, api, json):
         category = cls(api)
-        for k, v in json.items():
+        for k, v in list(json.items()):
             setattr(category, k, v)
         return category
 
@@ -254,7 +254,7 @@ class SavedSearch(Model):
     @classmethod
     def parse(cls, api, json):
         ss = cls(api)
-        for k, v in json.items():
+        for k, v in list(json.items()):
             if k == 'created_at':
                 setattr(ss, k, parse_datetime(v))
             else:
@@ -289,7 +289,7 @@ class List(Model):
     @classmethod
     def parse(cls, api, json):
         lst = List(api)
-        for k, v in json.items():
+        for k, v in list(json.items()):
             if k == 'user':
                 setattr(lst, k, User.parse(api, v))
             elif k == 'created_at':
@@ -355,7 +355,7 @@ class Relation(Model):
     @classmethod
     def parse(cls, api, json):
         result = cls(api)
-        for k, v in json.items():
+        for k, v in list(json.items()):
             if k == 'value' and json['kind'] in ['Tweet', 'LookedupStatus']:
                 setattr(result, k, Status.parse(api, v))
             elif k == 'results':
@@ -369,7 +369,7 @@ class Relationship(Model):
     @classmethod
     def parse(cls, api, json):
         result = cls(api)
-        for k, v in json.items():
+        for k, v in list(json.items()):
             if k == 'connections':
                 setattr(result, 'is_following', 'following' in v)
                 setattr(result, 'is_followed_by', 'followed_by' in v)
@@ -401,7 +401,7 @@ class BoundingBox(Model):
     def parse(cls, api, json):
         result = cls(api)
         if json is not None:
-            for k, v in json.items():
+            for k, v in list(json.items()):
                 setattr(result, k, v)
         return result
 
@@ -431,7 +431,7 @@ class Place(Model):
     @classmethod
     def parse(cls, api, json):
         place = cls(api)
-        for k, v in json.items():
+        for k, v in list(json.items()):
             if k == 'bounding_box':
                 # bounding_box value may be null (None.)
                 # Example: "United States" (id=96683cc9126741d1)
@@ -465,7 +465,7 @@ class Media(Model):
     @classmethod
     def parse(cls, api, json):
         media = cls(api)
-        for k, v in json.items():
+        for k, v in list(json.items()):
             setattr(media, k, v)
         return media
 

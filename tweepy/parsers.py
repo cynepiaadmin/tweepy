@@ -2,7 +2,7 @@
 # Copyright 2009-2010 Joshua Roesslein
 # See LICENSE for details.
 
-from __future__ import print_function
+
 
 from tweepy.models import ModelFactory
 from tweepy.utils import import_simplejson

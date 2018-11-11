@@ -2,7 +2,7 @@
 # Copyright 2009-2010 Joshua Roesslein
 # See LICENSE for details.
 
-from __future__ import print_function
+
 
 import time
 import datetime
@@ -10,7 +10,7 @@ import threading
 import os
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 
@@ -121,7 +121,7 @@ class MemoryCache(Cache):
     def cleanup(self):
         self.lock.acquire()
         try:
-            for k, v in dict(self._entries).items():
+            for k, v in list(dict(self._entries).items()):
                 if self._is_expired(v, self.timeout):
                     del self._entries[k]
         finally:
